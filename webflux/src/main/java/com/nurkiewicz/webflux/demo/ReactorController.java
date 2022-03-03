@@ -1,24 +1,29 @@
 package com.nurkiewicz.webflux.demo;
 
-
-import java.time.Duration;
-import java.time.Instant;
-import java.util.concurrent.TimeUnit;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import reactor.core.publisher.Flux;
-import reactor.core.publisher.Mono;
-
 import org.springframework.http.CacheControl;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.reactive.function.client.WebClient;
+import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
+
+import java.time.Duration;
+import java.time.Instant;
+import java.util.concurrent.TimeUnit;
 
 import static org.springframework.http.MediaType.APPLICATION_JSON;
 import static org.springframework.http.MediaType.TEXT_EVENT_STREAM_VALUE;
 
+// TODO:
+//  – RestTemplate – not async (uses single thread) and blocking (thread is blocked until request finishes)
+//  – AsyncRestTemplate (deprecated) – async (uses thread pool) and still blocking (thread is blocked until request finishes)
+//  – WebClient – async (uses many threads) and non-blocking (thread is not blocked, can be used for other work)
+
+// TODO: Reactive web clients do not give direct performance improvement from client's perspective
+//  They only improve server performance, threads do not waste time waiting for request
 
 @RestController
 class ReactorController {
@@ -89,12 +94,12 @@ class ReactorController {
 	}
 
 	@GetMapping("/proxy")
-	Mono<String> exampleProxy() {
+	Flux<String> exampleProxy() {
 		return webClient
 				.get()
-				.uri("http://example.com")
+				.uri("https://www.onet.pl/")
 				.retrieve()
-				.bodyToMono(String.class);
+				.bodyToFlux(String.class);
 	}
 
 	@GetMapping("/leak")

@@ -8,7 +8,7 @@ import java.util.function.Function;
 
 import com.nurkiewicz.reactor.samples.Ping;
 import com.nurkiewicz.reactor.user.LoremIpsum;
-import org.junit.Ignore;
+
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -18,7 +18,7 @@ import reactor.test.StepVerifier;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-@Ignore
+
 public class R040_Buffer {
 
 	private static final Logger log = LoggerFactory.getLogger(R040_Buffer.class);

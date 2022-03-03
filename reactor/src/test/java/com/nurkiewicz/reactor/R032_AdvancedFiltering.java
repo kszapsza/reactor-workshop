@@ -1,10 +1,5 @@
 package com.nurkiewicz.reactor;
 
-import java.nio.charset.StandardCharsets;
-import java.util.function.BiConsumer;
-import java.util.function.Function;
-import java.util.function.Predicate;
-
 import com.google.common.collect.ImmutableList;
 import com.google.common.hash.HashCode;
 import com.google.common.hash.Hashing;
@@ -13,7 +8,6 @@ import com.nurkiewicz.reactor.user.LoremIpsum;
 import com.nurkiewicz.reactor.user.Order;
 import com.nurkiewicz.reactor.user.User;
 import com.nurkiewicz.reactor.user.UserOrders;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -21,7 +15,12 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 
-@Ignore
+import java.nio.charset.StandardCharsets;
+import java.util.function.BiConsumer;
+import java.util.function.Function;
+import java.util.function.Predicate;
+
+
 public class R032_AdvancedFiltering {
 
 	private static final Logger log = LoggerFactory.getLogger(R032_AdvancedFiltering.class);
@@ -62,7 +61,7 @@ public class R032_AdvancedFiltering {
 				.flatMap(UserOrders::lastOrderOf);
 
 		//when
-		final Flux<Item> items = null; //Hint: start by copy-pasting solution from above using handle()
+		final Flux<Item> items = null; //Hint: start by copy-pasting solution from above using handle() // TODO
 
 		//then
 		items
@@ -122,7 +121,14 @@ public class R032_AdvancedFiltering {
 		final Flux<String> words = Flux.just(LoremIpsum.words());
 
 		//when
-		final Flux<String> filtered = words;
+		// TODO: IntelliJ: Shift+Control+P - show type hint
+
+		final Flux<String> filtered = words.flatMap(word ->
+				asyncSha256(word) // Mono<HashCode>
+						.filter(hashCode -> hashCode.toString().startsWith("0")) // Mono<HashCode>
+						.map(hashCode -> word) // Mono<String>
+		);
+		/* Flux<String> constructed from many elements of type Mono<String> */
 
 		//then
 		filtered
@@ -144,7 +150,12 @@ public class R032_AdvancedFiltering {
 		final Flux<String> words = Flux.just(LoremIpsum.words());
 
 		//when
-		final Flux<String> filtered = words;
+		// TODO: filterWhen() accepts *async* predicate (returning Mono<Boolean>)
+
+		final Flux<String> filtered = words.filterWhen(word ->
+				asyncSha256(word)
+						.map(hashCode -> hashCode.toString().startsWith("0"))
+		);
 
 		//then
 		filtered

@@ -3,7 +3,7 @@ package com.nurkiewicz.reactor;
 import java.math.BigDecimal;
 import java.util.concurrent.atomic.LongAdder;
 
-import org.junit.Ignore;
+
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -12,7 +12,7 @@ import reactor.core.publisher.Mono;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-@Ignore
+
 public class R035_DoOn {
 
 	private static final Logger log = LoggerFactory.getLogger(R035_DoOn.class);

@@ -31,7 +31,6 @@ public class Crawler {
 		return new Html("<html><title>" + url + "</title></html>");
 	}
 
-
 	private static final Semaphore concLimit = new Semaphore(MAX_CRAWLERS);
 
 	public static Html crawlThrottled(Domain domain) {
@@ -52,13 +51,13 @@ public class Crawler {
 				.subscribeOn(crawlAsyncScheduler);
 	}
 
-
 	/**
 	 * TODO Implement by returning all outgoing links. Use {@link #OUTGOING} map.
 	 * @see Mono#justOrEmpty(Object)
 	 */
 	public static Flux<URI> outgoingLinks(URI url) {
-		return Flux.empty();
+		// TODO: for given url return child items or empty list
+		return Flux.fromIterable(OUTGOING.getOrDefault(url, ImmutableList.of()));
 	}
 
 	private static final ImmutableMap<URI, ImmutableList<URI>> OUTGOING = links();

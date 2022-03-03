@@ -1,22 +1,23 @@
 package com.nurkiewicz.reactor;
 
-import java.time.Duration;
-import java.util.concurrent.TimeUnit;
-
 import com.nurkiewicz.reactor.samples.CacheServer;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import reactor.core.publisher.Mono;
 import reactor.core.scheduler.Schedulers;
 
-@Ignore
+import java.time.Duration;
+import java.util.concurrent.TimeUnit;
+
 public class R050_SubscribeOnPublishOn {
 
 	private static final Logger log = LoggerFactory.getLogger(R050_SubscribeOnPublishOn.class);
 
 	private final CacheServer reliable = new CacheServer("foo", Duration.ofMillis(1_000), 0);
+
+	// TODO: Command + F12 (Navigate | File Structure)
+	//  This popup displays the structure of a file, currently opened in the editor and having the focus.
 
 	@Test
 	public void sameThread() throws Exception {
@@ -32,6 +33,7 @@ public class R050_SubscribeOnPublishOn {
 
 	@Test
 	public void subscribeOn() throws Exception {
+		// TODO: subscribeOn may be placed anywhere between fromCallable() and subscribe()
 		Mono
 				.fromCallable(() -> reliable.findBlocking(41))
 				.subscribeOn(Schedulers.newBoundedElastic(10, 100, "SubscribeOn"))
@@ -77,6 +79,7 @@ public class R050_SubscribeOnPublishOn {
 
 	@Test
 	public void publishOn() throws Exception {
+		// TODO: publishOn() changes the thread pool being used (costly)
 		Mono
 				.fromCallable(() -> reliable.findBlocking(41))
 				.subscribeOn(Schedulers.newBoundedElastic(10, 100, "A"))

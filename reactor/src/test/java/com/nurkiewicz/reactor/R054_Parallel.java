@@ -4,12 +4,12 @@ import com.nurkiewicz.reactor.domains.Crawler;
 import com.nurkiewicz.reactor.domains.Domain;
 import com.nurkiewicz.reactor.domains.Domains;
 import com.nurkiewicz.reactor.domains.Html;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
+import reactor.core.scheduler.Schedulers;
 import reactor.util.function.Tuple2;
 import reactor.util.function.Tuples;
 
@@ -20,7 +20,6 @@ import java.util.function.Function;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-@Ignore
 public class R054_Parallel {
 
 	private static final Logger log = LoggerFactory.getLogger(R054_Parallel.class);
@@ -37,7 +36,11 @@ public class R054_Parallel {
 		final Flux<Domain> domains = Domains.all();
 
 		//when
-		final Flux<Html> htmls = null; // TODO
+		final Flux<Html> htmls = domains
+				.parallel(60)
+				.runOn(Schedulers.newBoundedElastic(60, 100, "domains"))
+				.map(Crawler::crawlBlocking)
+				.sequential();
 
 		//then
 		final List<String> strings = htmls.map(Html::getRaw).collectList().block();

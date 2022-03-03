@@ -1,11 +1,5 @@
 package com.nurkiewicz.reactor;
 
-import java.time.Duration;
-import java.util.concurrent.ThreadLocalRandom;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.function.Function;
-
 import com.nurkiewicz.reactor.samples.CacheServer;
 import com.nurkiewicz.reactor.user.User;
 import org.junit.Ignore;
@@ -16,6 +10,12 @@ import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 import reactor.util.retry.Retry;
 import reactor.util.retry.RetryBackoffSpec;
+
+import java.time.Duration;
+import java.util.concurrent.ThreadLocalRandom;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.function.Function;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -140,10 +140,12 @@ public class R045_ErrorHandling {
 	@Test
 	public void fixEagerMono() throws Exception {
 		//given
-		final Mono<User> mono = broken();
+		final Mono<User> mono = Mono.defer(this::broken);
 
 		//when
-		final Mono<User> retried = mono.retry();
+		final Mono<User> retried = mono
+				.doOnError(error -> log.error("Error: ", error))
+				.retry();
 
 		//then
 		retried
@@ -153,11 +155,23 @@ public class R045_ErrorHandling {
 	}
 
 	Mono<User> broken() {
-		double rand = ThreadLocalRandom.current().nextDouble();
-		if (rand > 0.1) {
-			return Mono.error(new RuntimeException("Too big value " + rand));
-		}
-		return Mono.just(new User(1));
+		/*
+			double rand = ThreadLocalRandom.current().nextDouble();
+			if (rand > 0.1) {
+				return Mono.error(new RuntimeException("Too big value " + rand));
+			}
+			return Mono.just(new User(1));
+
+			TODO: old code returned either Mono.just() – or Mono.error() which – once randomized – was then infinitely retried.
+			 A new version returns Mono.fromCallable() and behaves lazily - the callable is executed and randomizing happens on each retry.
+		*/
+		return Mono.fromCallable(() -> {
+			double rand = ThreadLocalRandom.current().nextDouble();
+			if (rand > 0.1) {
+				throw new RuntimeException("Too big value " + rand);
+			}
+			return new User(1);
+		});
 	}
 
 	@Test

@@ -4,7 +4,7 @@ import com.nurkiewicz.reactor.realestate.HouseApi;
 import com.nurkiewicz.reactor.realestate.HouseSnapshot;
 import com.nurkiewicz.reactor.realestate.HouseSnapshots;
 import org.junit.Before;
-import org.junit.Ignore;
+
 import org.junit.Test;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -15,7 +15,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-@Ignore
+
 public class R075_InfinitelyLazy {
 
     public static final Instant[] T = new Instant[]{
@@ -45,7 +45,7 @@ public class R075_InfinitelyLazy {
     }
 
     @Test
-    @Ignore
+    
     public void test_27() throws Exception {
         //given
 

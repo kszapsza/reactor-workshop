@@ -1,7 +1,6 @@
 package com.nurkiewicz.reactor;
 
 import com.nurkiewicz.reactor.samples.RestClient;
-import org.junit.Ignore;
 import org.junit.Test;
 import reactor.core.publisher.Mono;
 
@@ -10,7 +9,6 @@ import java.util.concurrent.atomic.AtomicInteger;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.failBecauseExceptionWasNotThrown;
 
-@Ignore
 public class R010_LetsMeetMono {
 
 	/**
@@ -101,7 +99,7 @@ public class R010_LetsMeetMono {
 	public void cachingMonoComputesOnlyOnce() throws Exception {
 		//given
 		AtomicInteger counter = new AtomicInteger();
-		final Mono<Integer> lazy = Mono.fromCallable(counter::incrementAndGet);
+		final Mono<Integer> lazy = Mono.fromCallable(counter::incrementAndGet).cache();
 
 		//when
 		lazy.block();

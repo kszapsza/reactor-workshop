@@ -5,7 +5,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicReference;
 
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
-import org.junit.Ignore;
+
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -15,7 +15,7 @@ import reactor.core.scheduler.Schedulers;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-@Ignore
+
 public class R051_WhatIsAscheduler {
 
 	private static final Logger log = LoggerFactory.getLogger(R051_WhatIsAscheduler.class);

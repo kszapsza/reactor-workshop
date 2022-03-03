@@ -3,10 +3,10 @@ package com.nurkiewicz.reactor;
 import java.time.Duration;
 import java.util.List;
 import java.util.function.Consumer;
+import java.util.function.Function;
 
 import com.nurkiewicz.reactor.samples.Ping;
 import com.nurkiewicz.reactor.user.LoremIpsum;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -15,7 +15,6 @@ import reactor.test.StepVerifier;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-@Ignore
 public class R041_Window {
 
 	private static final Logger log = LoggerFactory.getLogger(R041_Window.class);
@@ -93,7 +92,10 @@ public class R041_Window {
 		final Flux<String> words = Flux.just(LoremIpsum.words()).take(14);
 
 		//when
-		final Flux<String> third = words;
+		final Flux<String> third = words
+				.skip(2)
+				.window(1, 3)
+				.flatMap(Function.identity());
 
 		//then
 		assertThat(third.collectList().block())
@@ -113,9 +115,14 @@ public class R041_Window {
 
 		//when
 		//TODO operator here
-		final Flux<Long> fps = null;
+		final Flux<Long> fps = frames
+				.window(Duration.ofSeconds(1)) // TODO: split into 1 second time window
+				.flatMap(Flux::count); // TODO: count elements in every time window
+
 
 		//then
+		// TODO: test executes in real time so it takes over 4 secs
+		//  it could be improved
 		fps
 				.take(4)
 				.as(StepVerifier::create)

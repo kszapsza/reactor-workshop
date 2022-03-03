@@ -2,7 +2,7 @@ package com.nurkiewicz.reactor;
 
 import com.nurkiewicz.reactor.domains.Domain;
 import com.nurkiewicz.reactor.domains.Domains;
-import org.junit.Ignore;
+
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -15,7 +15,7 @@ import java.util.List;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.offset;
 
-@Ignore
+
 public class R052_ParsingCsv {
 
 	private static final Logger log = LoggerFactory.getLogger(R052_ParsingCsv.class);

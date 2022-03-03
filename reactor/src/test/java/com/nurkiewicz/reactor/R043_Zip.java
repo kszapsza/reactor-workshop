@@ -4,7 +4,7 @@ import com.nurkiewicz.reactor.samples.Ping;
 import com.nurkiewicz.reactor.user.Order;
 import com.nurkiewicz.reactor.user.User;
 import com.nurkiewicz.reactor.user.UserOrders;
-import org.junit.Ignore;
+
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -19,7 +19,6 @@ import java.util.concurrent.TimeUnit;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-@Ignore
 public class R043_Zip {
 
 	private static final Logger log = LoggerFactory.getLogger(R043_Zip.class);

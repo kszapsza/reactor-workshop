@@ -1,11 +1,14 @@
 package com.nurkiewicz.webflux.demo.feed;
 
+import org.springframework.data.domain.Sort;
 import reactor.core.publisher.Flux;
 
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+
+import java.util.Comparator;
 
 import static org.springframework.http.MediaType.TEXT_EVENT_STREAM_VALUE;
 
@@ -14,9 +17,11 @@ import static org.springframework.http.MediaType.TEXT_EVENT_STREAM_VALUE;
 public class ArticlesController {
 
     private final ArticlesStream articlesStream;
+    private final ArticleRepository articleRepository;
 
-    public ArticlesController(ArticlesStream articlesStream) {
+    public ArticlesController(ArticlesStream articlesStream, ArticleRepository articleRepository) {
         this.articlesStream = articlesStream;
+        this.articleRepository = articleRepository;
     }
 
     /**
@@ -24,7 +29,10 @@ public class ArticlesController {
      */
     @GetMapping("/newest/{limit}")
     Flux<Article> newest(@PathVariable int limit) {
-        return Flux.empty();
+        return articleRepository
+                .findAll()
+                .sort(Comparator.comparing(Article::getPublishedDate, Comparator.reverseOrder()))
+                .take(limit);
     }
 
     /**

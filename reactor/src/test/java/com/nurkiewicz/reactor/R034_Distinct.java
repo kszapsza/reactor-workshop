@@ -7,7 +7,6 @@ import com.nurkiewicz.reactor.email.Email;
 import com.nurkiewicz.reactor.samples.CacheCollectionAdapter;
 import com.nurkiewicz.reactor.samples.Weather;
 import com.nurkiewicz.reactor.samples.WeatherService;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -25,11 +24,11 @@ import java.util.function.Supplier;
 import static java.time.Duration.ofMillis;
 import static org.assertj.core.api.Assertions.assertThat;
 
-@Ignore
 public class R034_Distinct {
 
 	private static final Logger log = LoggerFactory.getLogger(R034_Distinct.class);
 
+	// TODO: IntelliJ: Control+G extend select to next occurrence
 	private static final Flux<String> words = Flux.just("elit", "elit", "est", "est", "eget", "et", "eget", "erat");
 
 	@Test
@@ -82,7 +81,9 @@ public class R034_Distinct {
 		final Flux<Weather> measurements = WeatherService.measurements();
 
 		//when
-		final Flux<Weather> changes = measurements;
+		final Flux<Weather> changes = measurements
+				.distinctUntilChanged(Weather::getTemperature, (temp1, temp2) -> Math.abs(temp2 - temp1) < 0.5);
+		// TODO: entries are considered unchanged (equal) if BiFunction keyComparator is true
 
 		//then
 		changes

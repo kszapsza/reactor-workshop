@@ -4,7 +4,6 @@ import java.math.BigDecimal;
 import java.util.concurrent.TimeUnit;
 
 import com.nurkiewicz.reactor.samples.CacheServer;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.reactivestreams.Publisher;
 import org.slf4j.Logger;
@@ -15,7 +14,6 @@ import reactor.test.StepVerifier;
 
 import static java.time.Duration.ofMillis;
 
-@Ignore
 public class R044_Merge {
 
 	private static final Logger log = LoggerFactory.getLogger(R044_Merge.class);
@@ -76,7 +74,10 @@ public class R044_Merge {
 		final Mono<String> sv = second.findBy(42);
 
 		//when
-		Mono<String> fastest = null; // TODO
+		Mono<String> fastest = Mono.firstWithSignal(fv, sv);
+
+		Mono<String> fastest0 = fv.mergeWith(sv).next(); // merged Flux<String> contains 2 strings, give me the first Mono (using next())
+		Mono<String> fastest1 = Flux.merge(fv, sv).next();
 
 		//then
 		fastest

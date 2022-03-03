@@ -1,20 +1,18 @@
 package com.nurkiewicz.reactor;
 
-import java.time.Duration;
-import java.util.function.Function;
-
 import com.nurkiewicz.reactor.samples.CacheServer;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 
+import java.time.Duration;
+import java.util.function.Function;
+
 import static java.time.Duration.ofMillis;
 import static java.time.Duration.ofSeconds;
 
-@Ignore
 public class R046_Timeout {
 
 	private static final Logger log = LoggerFactory.getLogger(R046_Timeout.class);
@@ -29,7 +27,7 @@ public class R046_Timeout {
 		final Mono<Long> withTimeout = Mono.delay(ofMillis(200));
 
 		//when
-		final Mono<Long> withFallback = withTimeout;
+		final Mono<Long> withFallback = withTimeout.timeout(ofMillis(100), Mono.just(-1L));
 
 		//then
 		withFallback
@@ -47,13 +45,17 @@ public class R046_Timeout {
 	@Test
 	public void timeoutAndRetries() throws Exception {
 		//given
-		CacheServer cacheServer = new CacheServer("foo", ofMillis(100), 0);
+		CacheServer cacheServer = new CacheServer("foo", ofMillis(10000), 0);
 
 		//when
 		final Mono<String> withTimeouts = cacheServer
 				.findBy(1)
-				//TODO Operators here
-				;
+				.timeout(ofMillis(80))
+				.doOnError(e -> log.debug("80ms timeout"))
+				.retry()
+				.timeout(ofSeconds(5))
+				.doOnError(e -> log.debug("5s retry timeout"))
+				.onErrorReturn("default");
 
 		//then
 		withTimeouts.block();
@@ -77,11 +79,18 @@ public class R046_Timeout {
 	@Test
 	public void speculativeExecution() throws Exception {
 		//given
-		CacheServer first = new CacheServer("foo", ofSeconds(1), 0);
-		CacheServer second = new CacheServer("bar", ofMillis(100), 0.5);
+		CacheServer first = new CacheServer("foo", ofMillis(200), 0);
+		CacheServer second = new CacheServer("bar", ofMillis(80), 0.75);
 
 		//when
-		final Mono<String> response = null;
+        final Mono<String> response = Mono.firstWithValue(
+                        first
+                                .findBy(1),
+                        second
+                                .findBy(1)
+                                .delaySubscription(Duration.ofMillis(200))
+                                .doOnError((error) -> System.out.println(error.getMessage())) // TODO: why no error happens???
+                );
 
 		//then
 		response

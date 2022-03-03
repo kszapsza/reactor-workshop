@@ -1,16 +1,9 @@
 package com.nurkiewicz.reactor;
 
-import java.time.Duration;
-import java.time.LocalDate;
-import java.time.Month;
-import java.util.List;
-import java.util.function.Function;
-
 import com.nurkiewicz.reactor.user.Item;
 import com.nurkiewicz.reactor.user.Order;
 import com.nurkiewicz.reactor.user.User;
 import com.nurkiewicz.reactor.user.UserOrders;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -18,13 +11,18 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 
+import java.time.Duration;
+import java.time.LocalDate;
+import java.time.Month;
+import java.util.List;
+import java.util.function.Function;
+
 import static com.google.common.collect.ImmutableList.of;
 import static java.time.Month.FEBRUARY;
 import static java.time.Month.JANUARY;
 import static java.time.Month.MARCH;
 import static org.assertj.core.api.Assertions.assertThat;
 
-@Ignore
 public class R031_FlatMap {
 
 	private static final Logger log = LoggerFactory.getLogger(R031_FlatMap.class);
@@ -69,8 +67,16 @@ public class R031_FlatMap {
 	public void flattenTwice() throws Exception {
 		//given
 
+		// flatMap() == merge(map())
+
 		//when
-		final Flux<Item> items = null;  //USERS.flatMap...
+		final Flux<Item> items = USERS
+				.flatMap(user -> UserOrders.lastOrderOf(user)) // Flux<Order> // TODO: flatMap() only accepts lambdas returning Mono/Flux
+				.flatMapIterable(order -> order.getItems()); // Flux<Item> // TODO: flatMapIterable() accepts lambdas returning Iterables
+
+		final Flux<Item> items0 = USERS
+				.flatMap(user -> UserOrders.lastOrderOf(user))
+				.flatMap(order -> Flux.fromIterable(order.getItems())); // equivalent, may be more effective
 
 		//then
 		items
@@ -92,7 +98,7 @@ public class R031_FlatMap {
 		final Flux<Mono<Order>> nested = USERS.map(UserOrders::lastOrderOf);
 
 		//when
-		Flux<Order> orders = null;  //TODO nested...
+		Flux<Order> orders = nested.flatMap(Function.identity()); // TODO: same as flatMap(mono -> mono)
 
 		//then
 		orders

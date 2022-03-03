@@ -1,18 +1,19 @@
 package com.nurkiewicz.webflux.demo.emojis;
 
-import java.net.URI;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.stream.Collectors;
-
-import reactor.core.publisher.Flux;
-
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.codec.ServerSentEvent;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.reactive.function.client.WebClient;
+import reactor.core.publisher.Flux;
+
+import java.net.URI;
+import java.time.Duration;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 import static java.util.Comparator.reverseOrder;
 import static java.util.stream.Collectors.toMap;
@@ -38,19 +39,43 @@ public class EmojiController {
                 .bodyToFlux(ServerSentEvent.class);
     }
 
+    // Counts events per second
     @GetMapping(value = "/emojis/rps", produces = TEXT_EVENT_STREAM_VALUE)
     Flux<Long> rps() {
-        return Flux.empty();
+        return webClient
+                .get()
+                .uri(emojiTrackerUrl)
+                .retrieve()
+                .bodyToFlux(ServerSentEvent.class)
+                .window(Duration.ofSeconds(1))
+                .flatMap(Flux::count);
     }
 
+    // Counts total emojis per second
     @GetMapping(value = "/emojis/eps", produces = TEXT_EVENT_STREAM_VALUE)
     Flux<Integer> eps() {
-        return Flux.empty();
+        return webClient
+                .get()
+                .uri(emojiTrackerUrl)
+                .retrieve()
+                .bodyToFlux(new ParameterizedTypeReference<Map<String, Integer>>() {})
+                .flatMapIterable(Map::values)
+                .window(Duration.ofSeconds(1))
+                .flatMap(window -> window.reduce(0, Integer::sum));
     }
 
     @GetMapping(value = "/emojis/aggregated", produces = TEXT_EVENT_STREAM_VALUE)
     Flux<Map<String, Integer>> aggregated() {
-        return Flux.empty();
+        return webClient
+                .get()
+                .uri(emojiTrackerUrl)
+                .retrieve()
+                .bodyToFlux(new ParameterizedTypeReference<Map<String, Integer>>() {})
+                .scan(new HashMap<>(), (acc, next) -> {
+                            next.forEach((emoji, count) -> acc.merge(emoji, count, Integer::sum));
+                            return acc;
+                        }
+                );
     }
 
     /**
@@ -58,8 +83,10 @@ public class EmojiController {
      */
     @GetMapping(value = "/emojis/top", produces = TEXT_EVENT_STREAM_VALUE)
     Flux<Map<String, Integer>> top(@RequestParam(defaultValue = "10", required = false) int limit) {
-//        return aggregated()...
-        return Flux.empty();
+        return aggregated()
+                .map(hashMap -> topValues(hashMap, limit))
+                .distinctUntilChanged(); // TODO: nice use case.
+//        return Flux.empty();
     }
 
     private <T> Map<T, Integer> topValues(Map<T, Integer> agg, int n) {
@@ -73,7 +100,9 @@ public class EmojiController {
 
     @GetMapping(value = "/emojis/topStr", produces = TEXT_EVENT_STREAM_VALUE)
     Flux<String> topStr(@RequestParam(defaultValue = "10", required = false) int limit) {
-        return Flux.empty();
+        return top(limit)
+                .map(this::keysAsOneString)
+                .distinctUntilChanged();
     }
 
     String keysAsOneString(Map<String, Integer> m) {
@@ -85,6 +114,9 @@ public class EmojiController {
     }
 
     static String codeToEmoji(String hex) {
+        if (hex == null || hex.isBlank()) {
+            return "";
+        }
         final String[] codes = hex.split("-");
         if (codes.length == 2) {
             return hexToEmoji(codes[0]) + hexToEmoji(codes[1]);
@@ -94,7 +126,9 @@ public class EmojiController {
     }
 
     private static String hexToEmoji(String hex) {
+        if (hex == null || hex.isBlank()) {
+            return "";
+        }
         return new String(Character.toChars(Integer.parseInt(hex, 16)));
     }
-
 }

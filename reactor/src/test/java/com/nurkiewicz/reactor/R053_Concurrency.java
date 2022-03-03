@@ -1,15 +1,9 @@
 package com.nurkiewicz.reactor;
 
-import java.net.URI;
-import java.util.List;
-import java.util.Map;
-import java.util.function.Function;
-
 import com.nurkiewicz.reactor.domains.Crawler;
 import com.nurkiewicz.reactor.domains.Domain;
 import com.nurkiewicz.reactor.domains.Domains;
 import com.nurkiewicz.reactor.domains.Html;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.reactivestreams.Publisher;
 import org.slf4j.Logger;
@@ -17,12 +11,17 @@ import org.slf4j.LoggerFactory;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.core.scheduler.Scheduler;
+import reactor.core.scheduler.Schedulers;
 import reactor.util.function.Tuple2;
 import reactor.util.function.Tuples;
 
+import java.net.URI;
+import java.util.List;
+import java.util.Map;
+import java.util.function.Function;
+
 import static org.assertj.core.api.Assertions.assertThat;
 
-@Ignore
 public class R053_Concurrency {
 
 	private static final Logger log = LoggerFactory.getLogger(R053_Concurrency.class);
@@ -43,7 +42,16 @@ public class R053_Concurrency {
 				.doOnSubscribe(s -> log.info("About to load file"));
 
 		//when
-		final Flux<Html> htmls = null; // TODO
+
+		// TODO: if we use a BLOCKING function in our map() (i.e. not returning Mono/Flux), we must wrap it with e.g. Mono.fromCallable()
+		//  + we have to define our thread pool for every Mono running
+
+		final Scheduler scheduler = Schedulers.newBoundedElastic(60, 600, "domains");
+		final Flux<Html> htmls = domains
+				.flatMap(domain ->
+						Mono.fromCallable(() -> Crawler.crawlBlocking(domain))
+								.subscribeOn(scheduler)
+				);
 
 		//then
 		final List<String> strings = htmls.map(Html::getRaw).collectList().block();
@@ -60,14 +68,34 @@ public class R053_Concurrency {
 	 */
 	@Test(timeout = 10_000L)
 	public void knowWhereHtmlCameFrom() throws Exception {
+
+		// TODO: IntelliJ: extend selection – Option + arrow up/down
+
 		//given
 		final Flux<Domain> domains = Domains.all();
 
 		//when
-		final Flux<Tuple2<URI, Html>> tuples = null; // TODO
+
+		// TODO: Nested map is required in this case because Crawler returns Mono
+		//  and we would end up with Flux<Tuple2<URI, Mono<Html>>>.
+		//  Mapping Crawler Mono result to tuple results in Flux<Tuple2<URI, Html>.
+
+		final Flux<Tuple2<URI, Html>> tuples = domains
+				.flatMap((Domain domain) ->
+						Crawler.crawlAsync(domain) // Mono<Html>
+								.map(html -> Tuples.of(domain.getUri(), html)) // Mono<Tuple2<URI, Html>>
+				);
+
+		// TODO: We can't use zip() on Fluxes with URIs and HTMLs because the order will be random.
+		//  We may use zip() on each created Mono –ś like this:
+
+		final Flux<Tuple2<URI, Html>> tuples0 = domains
+				.flatMap((Domain domain) ->
+						Mono.just(domain.getUri()).zipWith(Crawler.crawlAsync(domain))
+				);
 
 		//then
-		final List<Tuple2<URI, Html>> list = tuples
+		final List<Tuple2<URI, Html>> list = tuples0
 				.collectList()
 				.block();
 
@@ -91,7 +119,16 @@ public class R053_Concurrency {
 		final Flux<Domain> domains = Domains.all();
 
 		//when
-		final Mono<Map<URI, Html>> mapStream = null; // TODO
+
+		// TODO: use flatMap() to Tuple2 from previous example
+		//  then use collectMap() with tuple getters
+
+		final Mono<Map<URI, Html>> mapStream = domains
+				.flatMap((Domain domain) ->
+						Crawler.crawlAsync(domain) // Mono<Html>
+								.map(html -> Tuples.of(domain.getUri(), html)) // Mono<Tuple2<URI, Html>>
+				)
+				.collectMap(Tuple2::getT1, Tuple2::getT2);
 
 		//then
 		final Map<URI, Html> map = mapStream.block();
@@ -120,7 +157,12 @@ public class R053_Concurrency {
 				.all();
 
 		//when
-		final Flux<Html> htmls = null; // TODO
+		final Scheduler scheduler = Schedulers.newBoundedElastic(60, 600, "domains");
+		final Flux<Html> htmls = domains
+				.flatMap(domain ->
+						Mono.fromCallable(() -> Crawler.crawlThrottled(domain))
+								.subscribeOn(scheduler)
+				, 50);
 
 		//then
 		final List<String> strings = htmls.map(Html::getRaw).collectList().block();

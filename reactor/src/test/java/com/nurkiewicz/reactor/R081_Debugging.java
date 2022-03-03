@@ -6,7 +6,7 @@ import java.time.Duration;
 import java.util.concurrent.TimeUnit;
 
 import org.junit.BeforeClass;
-import org.junit.Ignore;
+
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -15,7 +15,7 @@ import reactor.core.publisher.Mono;
 import reactor.core.scheduler.Schedulers;
 import reactor.tools.agent.ReactorDebugAgent;
 
-@Ignore
+
 public class R081_Debugging {
 
 	private static final Logger log = LoggerFactory.getLogger(R081_Debugging.class);

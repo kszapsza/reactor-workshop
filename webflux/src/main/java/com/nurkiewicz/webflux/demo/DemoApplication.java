@@ -1,11 +1,10 @@
 package com.nurkiewicz.webflux.demo;
 
-import java.time.Duration;
-
-import reactor.core.scheduler.Schedulers;
-
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import reactor.core.scheduler.Schedulers;
+
+import java.time.Duration;
 
 @SpringBootApplication
 public class DemoApplication {

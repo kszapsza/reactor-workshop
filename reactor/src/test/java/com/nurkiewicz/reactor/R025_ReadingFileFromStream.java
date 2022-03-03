@@ -1,7 +1,7 @@
 package com.nurkiewicz.reactor;
 
 import com.nurkiewicz.reactor.samples.NotFound;
-import org.junit.Ignore;
+
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -15,7 +15,6 @@ import java.util.function.Supplier;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-@Ignore
 public class R025_ReadingFileFromStream {
 
 	private static final Logger log = LoggerFactory.getLogger(R025_ReadingFileFromStream.class);
@@ -27,7 +26,12 @@ public class R025_ReadingFileFromStream {
 	@Test
 	public void readFileAsStreamOfLines() throws Exception {
 		//when
-		final Flux<String> lines = null;
+		final Flux<String> lines = Flux.fromStream(() -> open("/logback-test.xml").lines());
+
+		/* TODO:
+		 *     Flux.fromStream(Stream<? extends T>) is eager
+		 *     Flux.fromStream(Supplier<Stream<? extends T>>) is lazy
+		 */
 
 		//then
 		final Long count = lines
@@ -50,7 +54,9 @@ public class R025_ReadingFileFromStream {
 	@Test
 	public void readingFileShouldBeLazy() throws Exception {
 		//when
-		final Flux<String> lines = notFound();
+		final Flux<String> lines = Flux.defer(() -> notFound());
+
+		// TODO: Flux.defer() will instantiate lazy Flux from an eager one
 
 		//then
 		lines

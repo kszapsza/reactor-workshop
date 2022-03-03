@@ -1,13 +1,14 @@
 package com.nurkiewicz.webflux.demo.websocket;
 
+import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import reactor.core.publisher.Flux;
-import reactor.core.publisher.Mono;
-
 import org.springframework.web.reactive.socket.WebSocketHandler;
 import org.springframework.web.reactive.socket.WebSocketMessage;
 import org.springframework.web.reactive.socket.WebSocketSession;
+import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
+import reactor.core.publisher.Sinks;
 
 /**
  * TODO
@@ -21,13 +22,24 @@ import org.springframework.web.reactive.socket.WebSocketSession;
  */
 public class ChatHandler implements WebSocketHandler {
 
-	private static final Logger log = LoggerFactory.getLogger(ChatHandler.class);
+    private static final Logger log = LoggerFactory.getLogger(ChatHandler.class);
 
-	//TODO Use some Sink here
+	private final Sinks.Many<String> sink = Sinks.many().replay().limit(5);
 
-	@Override
-	public Mono<Void> handle(WebSocketSession session) {
-		return session.send(Flux.empty());
-	}
+    @Override
+    public @NotNull Mono<Void> handle(WebSocketSession session) {
+        //noinspection CallingSubscribeInNonBlockingScope
+        session.receive()
+				.map(WebSocketMessage::getPayloadAsText)
+				.doOnNext(x -> log.info("[{}] Received: '{}'", session.getId(), x))
+				.subscribe(sink::tryEmitNext);
+
+        final Flux<WebSocketMessage> outMessages = sink.asFlux()
+                .map(session::textMessage)
+                .doOnSubscribe(s -> log.info("Got new connection {}", session))
+                .doOnComplete(() -> log.info("Connection completed {}", session));
+
+        return session.send(outMessages);
+    }
 
 }

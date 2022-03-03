@@ -1,6 +1,6 @@
 package com.nurkiewicz.reactor;
 
-import org.junit.Ignore;
+
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -12,7 +12,7 @@ import java.util.concurrent.TimeUnit;
 import static java.time.Duration.ofNanos;
 import static java.time.Duration.ofSeconds;
 
-@Ignore
+
 public class R060_TransformCompose {
 
 	private static final Logger log = LoggerFactory.getLogger(R060_TransformCompose.class);

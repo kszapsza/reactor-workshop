@@ -1,13 +1,6 @@
 package com.nurkiewicz.reactor;
 
-import java.io.File;
-import java.io.FilenameFilter;
-import java.net.URI;
-import java.util.Arrays;
-import java.util.function.Function;
-
 import com.nurkiewicz.reactor.domains.Crawler;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -15,11 +8,15 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 
-@Ignore
+import java.io.File;
+import java.io.FilenameFilter;
+import java.net.URI;
+import java.util.Arrays;
+import java.util.function.Function;
+
 public class R073_Expand {
 
     private static final Logger log = LoggerFactory.getLogger(R073_Expand.class);
-
 
     @Test
     public void expand() throws Exception {
@@ -113,7 +110,8 @@ public class R073_Expand {
         final URI init = new URI("https://google.com");
 
         //when
-        final Flux<URI> allUris = null; // TODO
+        final Flux<URI> allUris = Flux.just(init)
+                        .expand(Crawler::outgoingLinks);
 
         //then
         allUris

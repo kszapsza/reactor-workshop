@@ -3,7 +3,7 @@ package com.nurkiewicz.reactor;
 import com.nurkiewicz.reactor.email.Email;
 import com.nurkiewicz.reactor.email.Inbox;
 import org.junit.After;
-import org.junit.Ignore;
+
 import org.junit.Test;
 import org.reactivestreams.Publisher;
 import org.slf4j.Logger;
@@ -19,7 +19,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.awaitility.Awaitility.await;
 import static org.hamcrest.Matchers.hasSize;
 
-@Ignore
+
 public class R023_CallbackToFlux {
 
 	private static final Logger log = LoggerFactory.getLogger(R023_CallbackToFlux.class);

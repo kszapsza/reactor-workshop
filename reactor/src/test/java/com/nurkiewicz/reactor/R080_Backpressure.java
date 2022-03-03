@@ -4,7 +4,7 @@ import java.time.Duration;
 import java.util.concurrent.TimeUnit;
 
 import com.nurkiewicz.reactor.samples.Sleeper;
-import org.junit.Ignore;
+
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -13,7 +13,7 @@ import reactor.core.publisher.Hooks;
 
 import static reactor.core.scheduler.Schedulers.newBoundedElastic;
 
-@Ignore
+
 public class R080_Backpressure {
 
     private static final Logger log = LoggerFactory.getLogger(R080_Backpressure.class);

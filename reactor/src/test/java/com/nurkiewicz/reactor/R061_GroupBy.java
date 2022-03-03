@@ -9,7 +9,7 @@ import com.nurkiewicz.reactor.domains.Domain;
 import com.nurkiewicz.reactor.domains.Domains;
 import com.nurkiewicz.reactor.domains.Tld;
 import com.nurkiewicz.reactor.user.LoremIpsum;
-import org.junit.Ignore;
+
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -17,12 +17,13 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.GroupedFlux;
 import reactor.test.StepVerifier;
 import reactor.util.function.Tuple2;
+import reactor.util.function.Tuples;
 
 import static java.util.stream.Collectors.toSet;
 import static org.assertj.core.api.Assertions.assertThat;
 import static reactor.util.function.Tuples.of;
 
-@Ignore
+
 public class R061_GroupBy {
 
     private static final Logger log = LoggerFactory.getLogger(R061_GroupBy.class);
@@ -113,7 +114,15 @@ public class R061_GroupBy {
         final Flux<Domain> domains = Domains.all();
 
         //when
-        final Flux<Tuple2<Tld, Long>> tldToTotalLinkingRootDomains = null; //TODO
+        // TODO: it's tough
+
+        final Flux<Tuple2<Tld, Long>> tldToTotalLinkingRootDomains = domains
+                .groupBy(Domain::getTld)
+                .flatMap(domainsForTld -> domainsForTld
+                        .map(Domain::getLinkingRootDomains)
+                        .reduce(0L, Long::sum)
+                        .map(count -> Tuples.of(domainsForTld.key(), count)))
+                .sort(Comparator.comparing(Tuple2::getT2, Comparator.reverseOrder()));
 
         //then
         tldToTotalLinkingRootDomains

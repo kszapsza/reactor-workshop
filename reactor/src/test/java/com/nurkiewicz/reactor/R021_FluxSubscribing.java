@@ -1,6 +1,6 @@
 package com.nurkiewicz.reactor;
 
-import org.junit.Ignore;
+
 import org.junit.Test;
 import org.reactivestreams.Publisher;
 import org.slf4j.Logger;
@@ -16,7 +16,7 @@ import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-@Ignore
+
 public class R021_FluxSubscribing {
 
 	private static final Logger log = LoggerFactory.getLogger(R021_FluxSubscribing.class);

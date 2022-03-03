@@ -1,7 +1,7 @@
 package com.nurkiewicz.reactor;
 
 import com.nurkiewicz.reactor.user.LoremIpsum;
-import org.junit.Ignore;
+
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -16,7 +16,7 @@ import static java.time.Duration.ofMillis;
 import static org.assertj.core.api.Assertions.assertThat;
 import static reactor.util.function.Tuples.of;
 
-@Ignore
+
 public class R047_TimestampIndex {
 
 	private static final Logger log = LoggerFactory.getLogger(R047_TimestampIndex.class);

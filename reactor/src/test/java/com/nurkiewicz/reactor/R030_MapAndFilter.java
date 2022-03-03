@@ -1,7 +1,7 @@
 package com.nurkiewicz.reactor;
 
 import com.nurkiewicz.reactor.user.LoremIpsum;
-import org.junit.Ignore;
+
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -12,7 +12,7 @@ import java.util.function.Predicate;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-@Ignore
+
 public class R030_MapAndFilter {
 
 	private static final Logger log = LoggerFactory.getLogger(R030_MapAndFilter.class);
